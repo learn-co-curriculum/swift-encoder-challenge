@@ -11,14 +11,21 @@ import UIKit
 class ViewController: UIViewController {
 
     @IBOutlet weak var textField: UITextField!
-    
     @IBOutlet weak var textLabel: UILabel!
     
-    var code: [String:String] = [:]
+    @IBOutlet weak var offset: UITextField!
     
+    @IBOutlet weak var offsetMessage: UILabel!
+    
+    var code: [String:String] = [:]
+    var encode: [String:String] = [:]
+    var newCode: [String:String] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
+       
+        self.textField.text = ""
+        self.textLabel.text = ""
         
         code = [
             "a" : "🐶",
@@ -49,51 +56,26 @@ class ViewController: UIViewController {
             "z" : "🐺"
         ]
         
-//        self.code = [
-//            "a" : "b",
-//            "b" : "c",
-//            "c" : "d",
-//            "d" : "e",
-//            "e" : "f",
-//            "f" : "g",
-//            "g" : "h",
-//            "h" : "i",
-//            "i" : "j",
-//            "j" : "k",
-//            "k" : "l",
-//            "l" : "m",
-//            "m" : "n",
-//            "n" : "o",
-//            "o" : "p",
-//            "p" : "q",
-//            "q" : "r",
-//            "r" : "s",
-//            "s" : "t",
-//            "t" : "u",
-//            "u" : "v",
-//            "v" : "w",
-//            "w" : "x",
-//            "x" : "y",
-//            "y" : "z",
-//            "z" : "a"
-//        ]
+        
  
-
     }
-
+    
+   
     @IBAction func convertBtnPressed(_ sender: AnyObject) {
         
-        //get textfield value through self.textfield
-        textLabel.text = self.textField.text
-        
         var encodedMessage = ""
-        
-        var spyMessage = self.textField.text
+        // Checking the offset value to choose the right code dictionary
+        if( offset.text == ""){
+            newCode = code
+        }else{
+            newCode = createCodeDictionary(number: Int(offset.text!)!)
+        }
+       
         if let unwrappedSpyMessage = self.textField.text{
             var lowerCaseMessage = unwrappedSpyMessage.lowercased()
             for char in lowerCaseMessage.characters{
-                var character = "\(char)"
-                if let encodedChar = self.code[character]{
+                let character = "\(char)"
+                if let encodedChar = self.newCode[character]{
                     encodedMessage += encodedChar
                 }else{
                     encodedMessage += character
@@ -101,19 +83,61 @@ class ViewController: UIViewController {
                 }
             }
         }
+        (self.textLabel.text) = encodedMessage
+        self.textField.text = ""
+      
         
-        print(encodedMessage)
-//        for char in (self.textField.text?.lowercased().characters)!{
-//            var character = "\(char)"
-//            print(character)
-//            
-//            print(self.code[character])
-//            print(char)
-//        }
+    }
+    
+    @IBAction func encoderBtPressed(_ sender: AnyObject) {
+        var decodedMessage = ""
+        // Creating the decode dictionary
+        for (key,value) in newCode {
+            self.encode[value] = key
+        }
         
+            if let unwrappedSpyMessage = self.textField.text{
+            var lowerCaseMessage = unwrappedSpyMessage.lowercased()
+            for char in lowerCaseMessage.characters{
+                let character = "\(char)"
+                if let decodedChar = self.encode[character]{
+                    decodedMessage += decodedChar
+                }else{
+                    decodedMessage += character
+                    // This should be a space
+                }
+            }
+        }
+        (self.textLabel.text) = decodedMessage
+        self.textField.text = ""
+    }
+    // Create a new dictionary based on the value of the offset
+    func createCodeDictionary( number : Int) ->[String:String]{
+        var newDictionary: [String:String] = [:]
+        var values: [String] = []
+        var keys: [String] = []
+        var offset = 0
+        // Store the keys and the values of the deictionary in two arrays after sorting the dictionary 
+        for (key,value) in code.sorted(by: { $0.0 < $1.0 }){
+        keys.append(key)
+        values.append(value)
+        }
+        if number <= values.count - 1{
+            offset = number
+        }else{
+            offset = number % values.count
+        }
+    // removing numbers of elements - equals to the offset number- from the begining of the array and append them at the end
+        for i in 0...offset - 1 {
+            let newNumber = values[0]
+            values.remove(at: 0)
+            values.append(newNumber)
+        }
         
-        
-        print(self.textField.text)
+        for (index,key) in keys.enumerated(){
+            newDictionary[key] = values[index]
+        }
+        return newDictionary
     }
     
 
